@@ -8,30 +8,31 @@ $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $path = str_replace('/backend/api/auth', '', $path);
 
 $auth = new AuthController();
+$requestData = json_decode(file_get_contents('php://input'), true);
 
 switch("$method:$path") {
     case 'POST:/login':
-        echo $auth->login($_REQUEST);
+        echo json_encode($auth->login($requestData));
         break;
         
     case 'POST:/register':
-        echo $auth->register($_REQUEST);
+        echo json_encode($auth->register($requestData));
         break;
         
     case 'POST:/logout':
-        echo $auth->logout($_REQUEST);
+        echo json_encode($auth->logout($requestData));
         break;
         
     case 'POST:/forgot-password':
-        echo $auth->forgotPassword($_REQUEST);
+        echo json_encode($auth->forgotPassword($requestData));
         break;
         
     case 'POST:/reset-password':
-        echo $auth->resetPassword($_REQUEST);
+        echo json_encode($auth->resetPassword($requestData));
         break;
         
     case 'GET:/user':
-        echo $auth->getUser($_REQUEST);
+        echo json_encode($auth->getUser($_GET));
         break;
         
     default:

@@ -1,13 +1,17 @@
-// backend/api/controllers/AuthController.php
-
 <?php
+// backend/api/controllers/AuthController.php
 
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../models/User.php';
+require 'vendor/autoload.php'; // Assurez-vous que l'autoload de Composer est inclus
+
+use \Firebase\JWT\JWT;
+use \Firebase\JWT\Key;
 
 class AuthController {
     private $db;
     private $user;
+    private $secretKey = 'votre_cle_secrete'; // Utilisez une clé secrète forte
 
     public function __construct() {
         $this->db = Database::getInstance();
@@ -122,21 +126,21 @@ class AuthController {
     }
 
     private function generateToken($user) {
-        // Implémentez votre logique de génération de token JWT ici
-        // Vous pouvez utiliser une bibliothèque comme firebase/php-jwt
         $payload = [
             'id' => $user['id'],
             'email' => $user['email'],
             'exp' => time() + (60 * 60 * 24) // 24 heures
         ];
 
-        // Retournez le token généré
-        return "token_example"; // À remplacer par votre implémentation
+        return JWT::encode($payload, $this->secretKey, 'HS256');
     }
 
     private function validateToken($token) {
-        // Implémentez votre logique de validation de token JWT ici
-        // Retournez les données de l'utilisateur si le token est valide
-        return; // À remplacer par votre implémentation
+        try {
+            $decoded = JWT::decode($token, new Key($this->secretKey, 'HS256'));
+            return (array) $decoded;
+        } catch (Exception $e) {
+            return null;
+        }
     }
 }

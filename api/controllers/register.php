@@ -1,11 +1,17 @@
 <?php
 header("Access-Control-Allow-Origin: *");
 header('Access-Control-Allow-Credentials: true');
-header('Access-Control-Allow-Methods: POST');
+header('Access-Control-Allow-Methods: POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 header('Content-Type: application/json');
 
 require_once '../config/database.php';
+require 'vendor/autoload.php'; // Assurez-vous que l'autoload de Composer est inclus
+
+use \Firebase\JWT\JWT;
+use \Firebase\JWT\Key;
+
+$secretKey = 'votre_cle_secrete'; // Utilisez une clé secrète forte
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
@@ -50,13 +56,13 @@ try {
     $stmt->execute([$data->username, $data->email, $hashedPassword]);
     $userId = $db->lastInsertId();
 
-    // Générer un token
-    $token = bin2hex(random_bytes(32));
-    $expiration = date('Y-m-d H:i:s', strtotime('+24 hours'));
-
-    // Insérer le token
-    $stmt = $db->prepare("INSERT INTO user_tokens (user_id, token, expiration) VALUES (?, ?, ?)");
-    $stmt->execute([$userId, $token, $expiration]);
+    // Générer un token JWT
+    $payload = [
+        'id' => $userId,
+        'email' => $data->email,
+        'exp' => time() + (60 * 60 * 24) // 24 heures
+    ];
+    $token = JWT::encode($payload, $secretKey, 'HS256');
 
     // Retourner la réponse
     echo json_encode([

@@ -1,62 +1,34 @@
-<?php
-header("Access-Control-Allow-Origin: *");
-header('Access-Control-Allow-Credentials: true');
-header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Allow-Headers: Content-Type');
-header('Content-Type: application/json');
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Réinitialisation du mot de passe</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="reset-password-container">
+    <div class="reset-password-card">
+      <h2>Réinitialisation du mot de passe</h2>
+      <form id="resetPasswordForm">
+        <div class="form-group">
+          <label for="newPassword">Nouveau mot de passe</label>
+          <input type="password" id="newPassword" name="newPassword" required placeholder="Entrez votre nouveau mot de passe">
+        </div>
+        <div class="form-group">
+          <label for="confirmPassword">Confirmer le mot de passe</label>
+          <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="Confirmez votre nouveau mot de passe">
+        </div>
+        <button type="submit" class="submit-button">Réinitialiser le mot de passe</button>
+      </form>
+    </div>
+  </div>
 
-require_once '../config/database.php';
-
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
-}
-
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['error' => 'Méthode non autorisée']);
-    exit();
-}
-
-try {
-    $database = new Database();
-    $db = $database->getConnection();
-
-    $data = json_decode(file_get_contents("php://input"));
-
-    if (!isset($data->token) || !isset($data->password)) {
-        throw new Exception('Token et nouveau mot de passe requis');
-    }
-
-    // Vérifier si le token est valide et non expiré
-    $stmt = $db->prepare("SELECT user_id FROM password_resets 
-                         WHERE token = ? AND expiration > NOW()");
-    $stmt->execute([$data->token]);
-    $reset = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if (!$reset) {
-        throw new Exception('Token invalide ou expiré');
-    }
-
-    // Mettre à jour le mot de passe
-    $hashedPassword = password_hash($data->password, PASSWORD_DEFAULT);
-    $stmt = $db->prepare("UPDATE users SET password = ? WHERE id = ?");
-    $stmt->execute([$hashedPassword, $reset['user_id']]);
-
-    // Supprimer le token utilisé
-    $stmt = $db->prepare("DELETE FROM password_resets WHERE user_id = ?");
-    $stmt->execute([$reset['user_id']]);
-
-    echo json_encode([
-        'status' => 'success',
-        'message' => 'Mot de passe mis à jour avec succès'
-    ]);
-
-} catch (Exception $e) {
-    http_response_code(400);
-    echo json_encode([
-        'status' => 'error',
-        'message' => $e->getMessage()
-    ]);
-}
-?>
+  <script>
+    document.getElementById('resetPasswordForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      // Logique pour soumettre le formulaire via AJAX
+    });
+  </script>
+</body>
+</html>

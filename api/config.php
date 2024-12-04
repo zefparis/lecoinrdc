@@ -36,3 +36,4 @@ define('CORS_ALLOWED_ORIGINS', getenv('CORS_ALLOWED_ORIGINS'));
 // Configuration Upload
 define('UPLOAD_MAX_SIZE', getenv('UPLOAD_MAX_SIZE'));
 define('ALLOWED_FILE_TYPES', getenv('ALLOWED_FILE_TYPES'));
+?>

@@ -1,5 +1,5 @@
 <?php
-// Routes pour la gestion des utilisateurs
+// backend/api/routes/auth.php
 
 // Vérification de l'accès direct au fichier
 if (!defined('ACCESS_GRANTED')) {
